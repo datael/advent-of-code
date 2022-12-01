@@ -26,11 +26,34 @@ struct Item {
     pub calories: i32,
 }
 
+#[allow(dead_code)]
+fn read_elf_input_take_while(all_lines: Vec<String>) -> Vec<Elf> {
+    let mut lines = all_lines.iter().peekable();
+    let mut elves = vec![];
+
+    while lines.peek() != None {
+        elves.push(Elf {
+            inventory: Inventory {
+                items: lines
+                    .by_ref()
+                    .take_while(|line| **line != "")
+                    .map(|line| line.parse())
+                    .flatten()
+                    .map(|calories| Item { calories })
+                    .collect(),
+            },
+        })
+    }
+
+    elves
+}
+
+#[allow(dead_code)]
 fn read_elf_input(all_lines: Vec<String>) -> Vec<Elf> {
+    let mut lines = all_lines.iter();
+
     let mut elves = vec![];
     let mut next_elf = Elf::new();
-
-    let mut lines = all_lines.iter();
 
     while let Some(line) = lines.next() {
         if line == "" {
