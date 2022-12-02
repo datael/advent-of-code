@@ -1,4 +1,4 @@
-use std::io::*;
+use lib::*;
 
 struct Elf {
     pub inventory: Inventory,
@@ -27,8 +27,8 @@ struct Item {
 }
 
 #[allow(dead_code)]
-fn read_elf_input_take_while(all_lines: Vec<String>) -> Vec<Elf> {
-    let mut lines = all_lines.iter().peekable();
+fn read_elf_input_take_while<I: IntoIterator<Item = String>>(all_lines: I) -> Vec<Elf> {
+    let mut lines = all_lines.into_iter().peekable();
     let mut elves = vec![];
 
     while lines.peek() != None {
@@ -36,7 +36,7 @@ fn read_elf_input_take_while(all_lines: Vec<String>) -> Vec<Elf> {
             inventory: Inventory {
                 items: lines
                     .by_ref()
-                    .take_while(|line| **line != "")
+                    .take_while(|line| *line != "")
                     .map(|line| line.parse())
                     .flatten()
                     .map(|calories| Item { calories })
@@ -49,8 +49,8 @@ fn read_elf_input_take_while(all_lines: Vec<String>) -> Vec<Elf> {
 }
 
 #[allow(dead_code)]
-fn read_elf_input(all_lines: Vec<String>) -> Vec<Elf> {
-    let mut lines = all_lines.iter();
+fn read_elf_input<I: IntoIterator<Item = String>>(all_lines: I) -> Vec<Elf> {
+    let mut lines = all_lines.into_iter();
 
     let mut elves = vec![];
     let mut next_elf = Elf::new();
@@ -71,12 +71,9 @@ fn read_elf_input(all_lines: Vec<String>) -> Vec<Elf> {
     elves
 }
 
-fn read_all_lines<R: BufRead>(reader: R) -> Vec<String> {
-    reader.lines().flatten().collect()
-}
-
 fn main() {
-    let elves = read_elf_input(read_all_lines(stdin().lock()));
+    let elves = read_elf_input_take_while(read_all_lines_from_stdin());
+    // let elves = read_elf_input(read_all_lines(stdin().lock()));
 
     // Part 1
     let total_calories: Vec<_> = elves
