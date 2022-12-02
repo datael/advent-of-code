@@ -3,5 +3,12 @@
 version = 3
 
 [[package]]
-name = "rust-advent-of-code-2022-day01"
+name = "lib"
 version = "0.1.0"
+
+[[package]]
+name = "rust_advent_of_code_2022_day01"
+version = "0.1.0"
+dependencies = [
+ "lib",
+]

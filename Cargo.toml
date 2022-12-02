@@ -1,5 +1,8 @@
 [workspace]
 resolver = "2"
-members = [ "day01" ]
+members = [
+    "day01",
+]
 
 [workspace.dependencies]
+lib = { path = "./lib" }
