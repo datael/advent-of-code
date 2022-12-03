@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use lib::read_all_lines_from_stdin;
 
 // One Elf has the important job of loading all of the rucksacks with supplies
@@ -9,8 +11,8 @@ use lib::read_all_lines_from_stdin;
 // packing failed to follow this rule for exactly one item type per rucksack.
 
 struct Rucksack {
-    left_compartment: Vec<char>,
-    right_compartment: Vec<char>,
+    left_compartment: HashSet<char>,
+    right_compartment: HashSet<char>,
 }
 
 // The Elves have made a list of all of the items currently in each rucksack
@@ -20,7 +22,12 @@ struct Rucksack {
 
 impl Rucksack {
     fn find_duplicate(self) -> char {
-        todo!()
+        self.left_compartment
+            .intersection(&self.right_compartment)
+            .into_iter()
+            .next()
+            .unwrap()
+            .to_owned()
     }
 
     // The list of items for each rucksack is given as characters all on a single
@@ -30,7 +37,12 @@ impl Rucksack {
     // items in the second compartment.
 
     fn fill(input: String) -> Self {
-        todo!()
+        let (left, right) = input.split_at(input.len() / 2);
+
+        Rucksack {
+            left_compartment: left.chars().collect(),
+            right_compartment: right.chars().collect(),
+        }
     }
 }
 
@@ -39,10 +51,21 @@ impl Rucksack {
 // - Lowercase item types a through z have priorities 1 through 26.
 // - Uppercase item types A through Z have priorities 27 through 52.
 
-fn to_priority(value: char) -> i32 {
-    todo!()
+fn to_priority(c: char) -> i32 {
+    match c {
+        'a'..='z' => c as i32 - 96,
+        'A'..='Z' => c as i32 - 38,
+        _ => panic!("Invalid input"),
+    }
 }
 
 fn main() {
-    // read_all_lines_from_stdin()
+    let part1_sum = read_all_lines_from_stdin()
+        .into_iter()
+        .map(Rucksack::fill)
+        .map(Rucksack::find_duplicate)
+        .map(to_priority)
+        .sum::<i32>();
+
+    println!("Sum of priorities: {}", part1_sum);
 }
