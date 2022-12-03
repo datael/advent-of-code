@@ -47,6 +47,26 @@ impl Shape {
             Shape::Scissors => *other == Shape::Paper,
         }
     }
+
+    fn losing_play(&self) -> Self {
+        match self {
+            Shape::Rock => Shape::Scissors,
+            Shape::Paper => Shape::Rock,
+            Shape::Scissors => Shape::Paper,
+        }
+    }
+
+    fn drawing_play(&self) -> Self {
+        *self
+    }
+
+    fn winning_play(&self) -> Self {
+        match self {
+            Shape::Rock => Shape::Paper,
+            Shape::Paper => Shape::Scissors,
+            Shape::Scissors => Shape::Rock,
+        }
+    }
 }
 
 enum Outcome {
@@ -61,6 +81,17 @@ impl From<Outcome> for Score {
             Outcome::Lose => Score(0),
             Outcome::Draw => Score(3),
             Outcome::Win => Score(6),
+        }
+    }
+}
+
+impl From<String> for Outcome {
+    fn from(value: String) -> Self {
+        match value.as_str() {
+            "X" => Self::Lose,
+            "Y" => Self::Draw,
+            "Z" => Self::Win,
+            _ => panic!("Invalid input"),
         }
     }
 }
@@ -90,17 +121,6 @@ impl Round {
     }
 }
 
-impl From<String> for Round {
-    fn from(value: String) -> Self {
-        let mut iter = value.split(" ").into_iter();
-
-        Round {
-            their_shape: iter.next().unwrap().to_string().into(),
-            our_shape: iter.next().unwrap().to_string().into(),
-        }
-    }
-}
-
 struct Tournament {
     rounds: Vec<Round>,
 }
@@ -114,11 +134,47 @@ impl Tournament {
     }
 }
 
+trait RoundStrategy {
+    fn interpret(input: String) -> Round;
+}
+
+struct Part1Strategy;
+
+impl RoundStrategy for Part1Strategy {
+    fn interpret(input: String) -> Round {
+        let mut iter = input.split(" ").into_iter();
+
+        Round {
+            their_shape: iter.next().unwrap().to_string().into(),
+            our_shape: iter.next().unwrap().to_string().into(),
+        }
+    }
+}
+
+struct Part2Strategy;
+
+impl RoundStrategy for Part2Strategy {
+    fn interpret(input: String) -> Round {
+        let mut iter = input.split(" ").into_iter();
+        let their_shape: Shape = iter.next().unwrap().to_string().into();
+        let our_shape = match iter.next().unwrap().to_string().into() {
+            Outcome::Lose => their_shape.losing_play(),
+            Outcome::Draw => their_shape.drawing_play(),
+            Outcome::Win => their_shape.winning_play(),
+        };
+
+        Round {
+            their_shape,
+            our_shape,
+        }
+    }
+}
+
 fn main() {
     let tournament = Tournament {
         rounds: read_all_lines_from_stdin()
             .into_iter()
-            .map(Into::into)
+            .map(Part2Strategy::interpret)
             .collect(),
     };
 
