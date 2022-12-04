@@ -1,3 +1,4 @@
+use itertools::Itertools;
 use lib::*;
 
 struct Elf {
@@ -24,6 +25,25 @@ impl Inventory {
 
 struct Item {
     pub calories: i32,
+}
+
+#[allow(dead_code)]
+fn read_elf_input_group_by<I: IntoIterator<Item = String>>(all_lines: I) -> Vec<Elf> {
+    all_lines
+        .into_iter()
+        .group_by(|line| *line != "")
+        .into_iter()
+        .map(|elf_lines| Elf {
+            inventory: Inventory {
+                items: elf_lines
+                    .1
+                    .map(|line| line.parse())
+                    .flatten()
+                    .map(|calories| Item { calories })
+                    .collect(),
+            },
+        })
+        .collect()
 }
 
 #[allow(dead_code)]
@@ -72,7 +92,8 @@ fn read_elf_input<I: IntoIterator<Item = String>>(all_lines: I) -> Vec<Elf> {
 }
 
 fn main() {
-    let elves = read_elf_input_take_while(read_all_lines_from_stdin());
+    let elves = read_elf_input_group_by(read_all_lines_from_stdin());
+    // let elves = read_elf_input_take_while(read_all_lines_from_stdin());
     // let elves = read_elf_input(read_all_lines(stdin().lock()));
 
     // Part 1
