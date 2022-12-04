@@ -25,6 +25,7 @@ version = "0.1.0"
 name = "rust_advent_of_code_2022_day01"
 version = "0.1.0"
 dependencies = [
+ "itertools",
  "lib",
 ]
 
