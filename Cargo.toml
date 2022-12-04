@@ -3,7 +3,9 @@ resolver = "2"
 members = [
     "day01",
     "day02",
+    "day03",
 ]
 
 [workspace.dependencies]
 lib = { path = "./lib" }
+itertools = "^0.10"
