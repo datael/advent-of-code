@@ -8,3 +8,4 @@ members = [
 
 [workspace.dependencies]
 lib = { path = "./lib" }
+itertools = "^0.10"

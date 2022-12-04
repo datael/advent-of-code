@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 lib.workspace = true
+itertools.workspace = true
