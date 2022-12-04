@@ -11,10 +11,7 @@ use lib::read_all_lines_from_stdin;
 // meant to go into exactly one of the two compartments. The Elf that did the
 // packing failed to follow this rule for exactly one item type per rucksack.
 
-struct Rucksack {
-    pub left_compartment: HashSet<char>,
-    pub right_compartment: HashSet<char>,
-}
+struct Rucksack(HashSet<char>, HashSet<char>);
 
 // The Elves have made a list of all of the items currently in each rucksack
 // (your puzzle input), but they need your help finding the errors. Every item
@@ -23,8 +20,8 @@ struct Rucksack {
 
 impl Rucksack {
     fn find_duplicate(self) -> char {
-        self.left_compartment
-            .intersection(&self.right_compartment)
+        self.0
+            .intersection(&self.1)
             .into_iter()
             .next()
             .unwrap()
@@ -38,12 +35,12 @@ impl Rucksack {
     // items in the second compartment.
 
     fn fill(input: &String) -> Self {
-        let (left, right) = input.split_at(input.len() / 2);
+        let compartments = input.split_at(input.len() / 2);
 
-        Rucksack {
-            left_compartment: left.chars().collect(),
-            right_compartment: right.chars().collect(),
-        }
+        Rucksack(
+            compartments.0.chars().collect(),
+            compartments.1.chars().collect(),
+        )
     }
 }
 
@@ -100,12 +97,7 @@ fn find_common_item<I: IntoIterator<Item = Rucksack>>(rucksacks: I) -> char {
     // union of left and right compartments gives all items in each rucksack
     let rucksack_items: Vec<HashSet<char>> = rucksacks
         .into_iter()
-        .map(|r| {
-            r.left_compartment
-                .union(&r.right_compartment)
-                .copied()
-                .collect()
-        })
+        .map(|r| r.0.union(&r.1).copied().collect())
         .collect();
 
     // reduce with hashset intersections to find the one item common in all rucksacks

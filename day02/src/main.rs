@@ -22,10 +22,6 @@ enum Shape {
     Scissors,
 }
 
-struct Tournament {
-    rounds: Vec<Round>,
-}
-
 // Rock Paper Scissors is a game between two players. Each game contains many
 // rounds; in each round, the players each simultaneously choose one of Rock,
 // Paper, or Scissors using a hand shape.
@@ -40,6 +36,7 @@ struct Round {
 // selected: Rock defeats Scissors, Scissors defeats Paper, and Paper defeats
 // Rock. If both players choose the same shape, the round instead ends in a
 // draw.
+
 enum Outcome {
     Lose,
     Draw,
@@ -205,7 +202,11 @@ impl Shape {
 // should calculate the score you would get if you were to follow the strategy
 // guide.
 
-impl Tournament {
+struct TournamentGames {
+    rounds: Vec<Round>,
+}
+
+impl TournamentGames {
     fn calculate_our_score(&self) -> Score {
         self.rounds
             .iter()
@@ -220,7 +221,7 @@ fn main() {
     // What would your total score be if everything goes exactly according to your
     // strategy guide?
 
-    let part1_tournament = Tournament {
+    let part1_tournament = TournamentGames {
         rounds: input.iter().map(Part1Strategy::interpret).collect(),
     };
 
@@ -229,7 +230,7 @@ fn main() {
     // Following the Elf's instructions for the second column, what would your
     // total score be if everything goes exactly according to your strategy guide?
 
-    let part2_tournament = Tournament {
+    let part2_tournament = TournamentGames {
         rounds: input.iter().map(Part2Strategy::interpret).collect(),
     };
 
