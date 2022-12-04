@@ -51,8 +51,8 @@ impl Rucksack {
 
 fn to_priority(c: char) -> i32 {
     match c {
-        'a'..='z' => c as i32 - 96,
-        'A'..='Z' => c as i32 - 38,
+        'a'..='z' => c as i32 - 'a' as i32 + 1,
+        'A'..='Z' => c as i32 - 'A' as i32 + 27,
         _ => panic!("Invalid input"),
     }
 }
