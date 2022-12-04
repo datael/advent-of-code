@@ -1,6 +1,12 @@
 use itertools::Itertools;
 use lib::*;
 
+// The jungle must be too overgrown and difficult to navigate in vehicles or
+// access from the air; the Elves' expedition traditionally goes on foot. As
+// your boats approach land, the Elves begin taking inventory of their
+// supplies. One important consideration is food - in particular, the number
+// of Calories each Elf is carrying (your puzzle input).
+
 struct Elf {
     pub inventory: Inventory,
 }
@@ -26,6 +32,11 @@ impl Inventory {
 struct Item {
     pub calories: i32,
 }
+
+// The Elves take turns writing down the number of Calories contained by the
+// various meals, snacks, rations, etc. that they've brought with them, one
+// item per line. Each Elf separates their own inventory from the previous
+// Elf's inventory (if any) by a blank line.
 
 #[allow(dead_code)]
 fn read_elf_input_group_by<I: IntoIterator<Item = String>>(all_lines: I) -> Vec<Elf> {
@@ -91,12 +102,33 @@ fn read_elf_input<I: IntoIterator<Item = String>>(all_lines: I) -> Vec<Elf> {
     elves
 }
 
+// 1000
+// 2000
+// 3000
+
+// 4000
+
+// 5000
+// 6000
+
+// 7000
+// 8000
+// 9000
+
+// 10000
+
+// In case the Elves get hungry and need extra snacks, they need to know which
+// Elf to ask: they'd like to know how many Calories are being carried by the
+// Elf carrying the most Calories. In the example above, this is 24000
+// (carried by the fourth Elf).
+
 fn main() {
     let elves = read_elf_input_group_by(read_all_lines_from_stdin());
     // let elves = read_elf_input_take_while(read_all_lines_from_stdin());
     // let elves = read_elf_input(read_all_lines(stdin().lock()));
 
-    // Part 1
+    // Find the Elf carrying the most Calories. How many total Calories is that
+    // Elf carrying?
     let total_calories: Vec<_> = elves
         .iter()
         .map(|elf| elf.inventory.total_calories())
@@ -105,7 +137,23 @@ fn main() {
     let max_calories = total_calories.iter().max();
     println!("Max calories carried by any elf: {}", max_calories.unwrap());
 
-    // Part 2
+    // By the time you calculate the answer to the Elves' question, they've
+    // already realized that the Elf carrying the most Calories of food might
+    // eventually run out of snacks.
+
+    // To avoid this unacceptable situation, the Elves would instead like to know
+    // the total Calories carried by the top three Elves carrying the most
+    // Calories. That way, even if one of those Elves runs out of snacks, they
+    // still have two backups.
+
+    // In the example above, the top three Elves are the fourth Elf (with 24000
+    // Calories), then the third Elf (with 11000 Calories), then the fifth Elf
+    // (with 10000 Calories). The sum of the Calories carried by these three elves
+    // is 45000.
+
+    // Find the top three Elves carrying the most Calories. How many Calories are
+    // those Elves carrying in total?
+
     let mut sorted_total_calories = total_calories;
     sorted_total_calories.sort_by(|a, b| b.cmp(a));
 
