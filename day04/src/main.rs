@@ -58,4 +58,15 @@ fn main() {
     let input: Vec<_> = read_all_lines_from_stdin().into_iter().collect();
 
     // In how many assignment pairs does one range fully contain the other?
+
+    let part1_assignments_needing_reconsideration = input
+        .iter()
+        .map(AssignmentPair::from)
+        .filter(AssignmentPair::needs_reconsideration)
+        .count();
+
+    println!(
+        "Assignments needing reconsideration: {}",
+        part1_assignments_needing_reconsideration
+    );
 }
