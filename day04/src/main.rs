@@ -5,6 +5,7 @@ use lib::read_all_lines_from_stdin;
 // sections of the camp. Every section has a unique ID number, and each Elf is
 // assigned a range of section IDs.
 
+#[derive(PartialEq, PartialOrd)]
 struct SectionId(u32);
 
 struct SectionAssignment {
@@ -31,7 +32,20 @@ struct AssignmentPair(SectionAssignment, SectionAssignment);
 
 impl From<&String> for AssignmentPair {
     fn from(value: &String) -> Self {
-        todo!()
+        let (a, b) = value.split_once(',').unwrap();
+
+        Self(a.into(), b.into())
+    }
+}
+
+impl From<&str> for SectionAssignment {
+    fn from(value: &str) -> Self {
+        let (from, to) = value.split_once('-').unwrap();
+
+        Self {
+            from: SectionId(from.parse().unwrap()),
+            to: SectionId(to.parse().unwrap()),
+        }
     }
 }
 
@@ -40,7 +54,7 @@ impl From<&String> for AssignmentPair {
 
 impl SectionAssignment {
     fn fully_contains(&self, other: &Self) -> bool {
-        todo!()
+        self.from <= other.from && self.to >= other.to
     }
 }
 
@@ -50,7 +64,7 @@ impl SectionAssignment {
 
 impl AssignmentPair {
     fn needs_reconsideration(&self) -> bool {
-        todo!()
+        self.0.fully_contains(&self.1) || self.1.fully_contains(&self.0)
     }
 }
 
