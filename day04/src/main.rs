@@ -14,7 +14,16 @@ struct SectionAssignment {
 }
 
 // However, as some of the Elves compare their section assignments with each
-// other, they've noticed that many of the assignments overlap. To try to
+// other, they've noticed that many of the assignments overlap.
+
+impl SectionAssignment {
+    fn has_overlap_with(&self, other: &Self) -> bool {
+        self.from <= other.from && self.to >= other.from
+            || self.from <= other.to && self.to >= other.to
+    }
+}
+
+// To try to
 // quickly find overlaps and reduce duplicated effort, the Elves pair up and
 // make a big list of the section assignments for each pair (your puzzle
 // input).
@@ -66,6 +75,10 @@ impl AssignmentPair {
     fn needs_reconsideration(&self) -> bool {
         self.0.fully_contains(&self.1) || self.1.fully_contains(&self.0)
     }
+
+    fn has_any_overlap(&self) -> bool {
+        self.0.has_overlap_with(&self.1) || self.1.has_overlap_with(&self.0)
+    }
 }
 
 fn main() {
@@ -82,5 +95,22 @@ fn main() {
     println!(
         "Assignments needing reconsideration: {}",
         part1_assignments_needing_reconsideration
+    );
+
+    // It seems like there is still quite a bit of duplicate work planned.
+    // Instead, the Elves would like to know the number of pairs that overlap at
+    // all.
+
+    // In how many assignment pairs do the ranges overlap?
+
+    let part2_assignments_with_any_overlap = input
+        .iter()
+        .map(AssignmentPair::from)
+        .filter(AssignmentPair::has_any_overlap)
+        .count();
+
+    println!(
+        "Assignments with any overlap: {}",
+        part2_assignments_with_any_overlap
     );
 }
