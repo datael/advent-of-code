@@ -21,9 +21,9 @@ struct Crate(char);
 // will rearrange them in a series of carefully-planned steps. After the
 // crates are rearranged, the desired crates will be at the top of each stack.
 
-struct GiantCargoCrane;
+struct GiantCargoCrane9000;
 
-impl GiantCargoCrane {
+impl GiantCargoCrane9000 {
     fn move_crate_between_stacks(storage: &mut SupplyStorage, from: &StackId, to: &StackId) {
         let c = storage.stacks[from.0 - 1].pop().unwrap();
         storage.stacks[to.0 - 1].push(c)
@@ -140,7 +140,7 @@ impl From<&str> for StackId {
     }
 }
 
-impl GiantCargoCrane {
+impl GiantCargoCrane9000 {
     fn apply(command: &RearrangementCommand, storage: &mut SupplyStorage) {
         for _ in 0..command.count {
             Self::move_crate_between_stacks(storage, &command.from, &command.to);
@@ -195,6 +195,31 @@ impl SupplyStorage {
     }
 }
 
+// As you watch the crane operator expertly rearrange the crates, you notice
+// the process isn't following your prediction.
+
+// Some mud was covering the writing on the side of the crane, and you quickly
+// wipe it away. The crane isn't a CrateMover 9000 - it's a CrateMover 9001.
+
+// The CrateMover 9001 is notable for many new and exciting features: air
+// conditioning, leather seats, an extra cup holder, and the ability to pick
+// up and move multiple crates at once.
+
+struct GiantCargoCrane9001;
+
+impl GiantCargoCrane9001 {
+    fn apply(command: &RearrangementCommand, storage: &mut SupplyStorage) {
+        let mut v = vec![];
+        for _ in 0..command.count {
+            v.push(storage.stacks[command.from.0 - 1].pop().unwrap());
+        }
+        v.reverse();
+        for c in v {
+            storage.stacks[command.to.0 - 1].push(c);
+        }
+    }
+}
+
 fn main() {
     let input: Vec<_> = read_all_lines_from_stdin().into_iter().collect();
 
@@ -207,7 +232,25 @@ fn main() {
         .iter()
         .skip_while(|line| !line.starts_with("move"))
         .map(RearrangementCommand::from)
-        .for_each(|command| GiantCargoCrane::apply(&command, &mut supply_storage));
+        .for_each(|command| GiantCargoCrane9000::apply(&command, &mut supply_storage));
+
+    println!(
+        "Crates at the top of each stack: {}",
+        supply_storage.top_of_each_stack()
+    );
+
+    // Before the rearrangement process finishes, update your simulation so that
+    // the Elves know where they should stand to be ready to unload the final
+    // supplies. After the rearrangement procedure completes, what crate ends up
+    // on top of each stack?
+
+    let mut supply_storage = SupplyStorage::from(&input);
+
+    input
+        .iter()
+        .skip_while(|line| !line.starts_with("move"))
+        .map(RearrangementCommand::from)
+        .for_each(|command| GiantCargoCrane9001::apply(&command, &mut supply_storage));
 
     println!(
         "Crates at the top of each stack: {}",
