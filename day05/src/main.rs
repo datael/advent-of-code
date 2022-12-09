@@ -1,3 +1,5 @@
+#![feature(iter_array_chunks)]
+
 use lib::read_all_lines_from_stdin;
 
 // The expedition can depart as soon as the final supplies have been unloaded
@@ -5,11 +7,13 @@ use lib::read_all_lines_from_stdin;
 // the needed supplies are buried under many other crates, the crates need to
 // be rearranged.
 
+#[derive(Debug)]
 struct SupplyStorage {
     stacks: Vec<Vec<Crate>>,
 }
 
-struct StackId(u32);
+struct StackId(usize);
+#[derive(Debug)]
 struct Crate(char);
 
 // The ship has a giant cargo crane capable of moving crates between stacks.
@@ -20,8 +24,9 @@ struct Crate(char);
 struct GiantCargoCrane;
 
 impl GiantCargoCrane {
-    fn move_crate_between_stacks(storage: &SupplyStorage, from: &StackId, to: &StackId) {
-        todo!()
+    fn move_crate_between_stacks(storage: &mut SupplyStorage, from: &StackId, to: &StackId) {
+        let c = storage.stacks[from.0 - 1].pop().unwrap();
+        storage.stacks[to.0 - 1].push(c)
     }
 }
 
@@ -45,10 +50,69 @@ impl GiantCargoCrane {
 
 impl<I> From<&I> for SupplyStorage
 where
-    I: IntoIterator<Item = String>,
+    I: IntoIterator<Item = String> + Clone,
 {
     fn from(value: &I) -> Self {
-        todo!()
+        let is_crate_line = |line: &String| line.contains('[');
+
+        let mut iter = value.clone().into_iter();
+
+        let mut stacks_lines = vec![];
+        let num_stacks;
+
+        loop {
+            let next = iter.next().unwrap();
+            if is_crate_line(&next) {
+                stacks_lines.push(next);
+            } else {
+                num_stacks = next.split_ascii_whitespace().count();
+                break;
+            }
+        }
+
+        let mut stacks: Vec<Vec<Crate>> = vec![];
+        for _ in 0..num_stacks {
+            stacks.push(vec![]);
+        }
+
+        stacks_lines.reverse();
+
+        for line in stacks_lines {
+            let mut iter = line.chars().array_chunks::<4>();
+            let mut index = 0;
+
+            while let Some(value) = iter.next() {
+                if value[0] == '[' {
+                    stacks[index].push(value.into())
+                }
+
+                index += 1;
+            }
+
+            if let Some(remainder) = iter.into_remainder() {
+                let mut remainder = remainder.into_iter();
+
+                if let Some(c) = remainder.next() {
+                    if c == '[' {
+                        stacks[index].push(remainder.next().unwrap().into())
+                    }
+                }
+            }
+        }
+
+        Self { stacks }
+    }
+}
+
+impl From<[char; 4]> for Crate {
+    fn from(value: [char; 4]) -> Self {
+        Self(value[1])
+    }
+}
+
+impl From<char> for Crate {
+    fn from(value: char) -> Self {
+        Self(value)
     }
 }
 
@@ -60,13 +124,29 @@ struct RearrangementCommand {
 
 impl From<&String> for RearrangementCommand {
     fn from(value: &String) -> Self {
-        todo!()
+        let mut iter = value.split(' ');
+        iter.next(); // move
+        let count = iter.next().unwrap().parse().unwrap();
+        iter.next(); // from
+        let from = iter.next().unwrap().into();
+        iter.next(); // to
+        let to = iter.next().unwrap().into();
+
+        RearrangementCommand { count, from, to }
+    }
+}
+
+impl From<&str> for StackId {
+    fn from(value: &str) -> Self {
+        Self(value.parse().unwrap())
     }
 }
 
 impl GiantCargoCrane {
-    fn apply(command: &RearrangementCommand, to: &SupplyStorage) {
-        todo!()
+    fn apply(command: &RearrangementCommand, storage: &mut SupplyStorage) {
+        for _ in 0..command.count {
+            Self::move_crate_between_stacks(storage, &command.from, &command.to);
+        }
     }
 }
 
@@ -109,7 +189,12 @@ impl GiantCargoCrane {
 
 impl SupplyStorage {
     fn top_of_each_stack(&self) -> String {
-        todo!()
+        self.stacks
+            .iter()
+            .map(|stack| stack.last())
+            .flatten()
+            .map(|c| c.0)
+            .collect()
     }
 }
 
@@ -119,18 +204,16 @@ fn main() {
     // After the rearrangement procedure completes, what crate ends up on top of
     // each stack?
 
-    let supply_storage = SupplyStorage::from(&input);
+    let mut supply_storage = SupplyStorage::from(&input);
 
     input
         .iter()
         .skip_while(|line| !line.starts_with("move"))
         .map(RearrangementCommand::from)
-        .for_each(|command| GiantCargoCrane::apply(&command, &supply_storage));
+        .for_each(|command| GiantCargoCrane::apply(&command, &mut supply_storage));
 
     println!(
         "Crates at the top of each stack: {}",
         supply_storage.top_of_each_stack()
     );
-
-    todo!()
 }
