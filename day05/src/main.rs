@@ -81,7 +81,7 @@ where
             let mut iter = line.chars().array_chunks::<4>();
             let mut index = 0;
 
-            while let Some(value) = iter.next() {
+            for value in iter.by_ref() {
                 if value[0] == '[' {
                     stacks[index].push(value.into())
                 }
@@ -89,9 +89,7 @@ where
                 index += 1;
             }
 
-            if let Some(remainder) = iter.into_remainder() {
-                let mut remainder = remainder.into_iter();
-
+            if let Some(mut remainder) = iter.into_remainder() {
                 if let Some(c) = remainder.next() {
                     if c == '[' {
                         stacks[index].push(remainder.next().unwrap().into())
@@ -191,8 +189,7 @@ impl SupplyStorage {
     fn top_of_each_stack(&self) -> String {
         self.stacks
             .iter()
-            .map(|stack| stack.last())
-            .flatten()
+            .filter_map(|stack| stack.last())
             .map(|c| c.0)
             .collect()
     }
