@@ -27,7 +27,7 @@ impl<const N: usize> CommunicationSystem for MarkerIsNDifferentCharacters<N> {
             // if we have 4 ones, then we have four different characters
             let mut l: u32 = 0;
             for c in window.chars() {
-                l |= 1 << c as u32 - 'a' as u32;
+                l |= 1 << (c as u32 - 'a' as u32);
             }
             if l.count_ones() as usize == N {
                 return i + N;
