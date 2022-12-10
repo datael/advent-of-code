@@ -23,8 +23,8 @@ impl<const N: usize> CommunicationSystem for MarkerIsNDifferentCharacters<N> {
     fn lock_onto_signal(signal: String) -> usize {
         for (i, window) in as_window::<N>(signal.as_str()).enumerate() {
             // signal is all lower-case ascii;
-            // make a bit-field on their ascii value and count ones
-            // if we have 4 ones, then we have four different characters
+            // make a bit-field on their ascii value (shifted so 'a' is 0) and count ones:
+            // if we have N ones, then we have N different characters
             let mut l: u32 = 0;
             for c in window.chars() {
                 l |= 1 << (c as u32 - 'a' as u32);
