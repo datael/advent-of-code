@@ -17,11 +17,11 @@ trait CommunicationSystem {
 // being used by the Elves, the start of a packet is indicated by a sequence
 // of four characters that are all different.
 
-struct PacketMarkerIsNDifferentCharacters;
+struct MarkerIsNDifferentCharacters<const N: usize>;
 
-impl CommunicationSystem for PacketMarkerIsNDifferentCharacters {
+impl<const N: usize> CommunicationSystem for MarkerIsNDifferentCharacters<N> {
     fn lock_onto_signal(signal: String) -> usize {
-        for (i, window) in as_window::<4>(signal.as_str()).enumerate() {
+        for (i, window) in as_window::<N>(signal.as_str()).enumerate() {
             // signal is all lower-case ascii;
             // make a bit-field on their ascii value and count ones
             // if we have 4 ones, then we have four different characters
@@ -29,8 +29,8 @@ impl CommunicationSystem for PacketMarkerIsNDifferentCharacters {
             for c in window.chars() {
                 l |= 1 << c as u32 - 'a' as u32;
             }
-            if l.count_ones() == 4 {
-                return i + 4;
+            if l.count_ones() as usize == N {
+                return i + N;
             }
         }
 
@@ -54,8 +54,18 @@ fn main() {
     input
         .iter()
         .map(Into::into)
-        .map(PacketMarkerIsNDifferentCharacters::lock_onto_signal)
+        .map(MarkerIsNDifferentCharacters::<4>::lock_onto_signal)
         .for_each(|offset| println!("Packet marker puts offset at {}", offset));
 
-    // as_window::<4>("abcdefghi").for_each(|s| println!("{s}"));
+    // Your device's communication system is correctly detecting packets, but
+    // still isn't working. It looks like it also needs to look for messages.
+
+    // A start-of-message marker is just like a start-of-packet marker, except it
+    // consists of 14 distinct characters rather than 4.
+
+    input
+        .iter()
+        .map(Into::into)
+        .map(MarkerIsNDifferentCharacters::<14>::lock_onto_signal)
+        .for_each(|offset| println!("Message marker puts offset at {}", offset));
 }
