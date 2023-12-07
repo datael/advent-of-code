@@ -1,18 +1,17 @@
 use std::collections::{HashMap, HashSet};
 
-const INPUT_TEST_PART_1: &str = include_str!("../input_test_part1.txt");
-const INPUT_TEST_PART_2: &str = include_str!("../input_test_part2.txt");
+const INPUT_TEST: &str = include_str!("../input_test.txt");
 const INPUT: &str = include_str!("../input.txt");
 
 fn main() {
-    let test_result = solve_part1(INPUT_TEST_PART_1);
+    let test_result = solve_part1(INPUT_TEST);
     println!("Test Part 1: {}", test_result);
     assert!(test_result == 4361);
 
     let part_1_result = solve_part1(INPUT);
     println!("Part 1: {}", part_1_result);
 
-    let test_result = solve_part2(INPUT_TEST_PART_2);
+    let test_result = solve_part2(INPUT_TEST);
     println!("Test Part 2: {}", test_result);
     assert!(test_result == 467835);
 
