@@ -69,3 +69,7 @@ version = "0.1.0"
 [[package]]
 name = "advent-of-code-2023-day17"
 version = "0.1.0"
+
+[[package]]
+name = "advent-of-code-2023-day18"
+version = "0.1.0"
