@@ -107,13 +107,19 @@ impl<'a> From<&'a str> for ConnectedGate<'a> {
 
 impl<'a> From<&'a str> for Gate<'a> {
     fn from(value: &'a str) -> Self {
-        match *value.split(' ').collect::<Vec<_>>().as_slice() {
-            ["NOT", input] => Self::Not(input.into()),
-            [input, "AND", other] => Self::And(input.into(), other.into()),
-            [input, "OR", other] => Self::Or(input.into(), other.into()),
-            [input, "LSHIFT", amount] => Self::LShift(input.into(), amount.parse().unwrap()),
-            [input, "RSHIFT", amount] => Self::RShift(input.into(), amount.parse().unwrap()),
-            [input] => Self::Identity(input.into()),
+        let mut iter = value.split(' ');
+
+        match [iter.next(), iter.next(), iter.next()] {
+            [Some("NOT"), Some(input), ..] => Self::Not(input.into()),
+            [Some(input), Some("AND"), Some(other)] => Self::And(input.into(), other.into()),
+            [Some(input), Some("OR"), Some(other)] => Self::Or(input.into(), other.into()),
+            [Some(input), Some("LSHIFT"), Some(amount)] => {
+                Self::LShift(input.into(), amount.parse().unwrap())
+            }
+            [Some(input), Some("RSHIFT"), Some(amount)] => {
+                Self::RShift(input.into(), amount.parse().unwrap())
+            }
+            [Some(input), ..] => Self::Identity(input.into()),
             _ => unreachable!(),
         }
     }
