@@ -20,27 +20,27 @@ fn solve_part1(input: &str) -> usize {
 fn decode_line_and_compare(line: &str) -> (usize, usize) {
     let original_len = line.len();
 
-    let mut rem = line[1..line.len() - 1].chars().collect::<Vec<_>>();
-    let mut rem = &mut rem[..];
+    let mut rem = &line[1..line.len() - 1]; // Skip the surrounding quotes
     let mut res = vec![];
 
     while !rem.is_empty() {
-        let (num_consumed, parsed) = match rem[..std::cmp::min(rem.len(), 4)] {
-            ['\\', 'x', upper, lower] => {
-                let upper = from_hex(upper);
-                let lower = from_hex(lower);
+        let (num_consumed, parsed) =
+            match rem.get(..std::cmp::min(rem.len(), 4)).unwrap().as_bytes() {
+                [b'\\', b'x', upper, lower] => {
+                    let upper = from_hex(*upper as char);
+                    let lower = from_hex(*lower as char);
 
-                let c = (upper * 16 + lower) as char;
+                    let c = (upper * 16 + lower) as char;
 
-                (4, c)
-            }
-            ['\\', c, ..] => (2, c),
-            [c, ..] => (1, c),
-            [] => unreachable!(),
-        };
+                    (4, c)
+                }
+                [b'\\', c, ..] => (2, *c as char),
+                [c, ..] => (1, *c as char),
+                [] => unreachable!(),
+            };
 
         res.push(parsed);
-        rem = &mut rem[num_consumed..];
+        rem = &rem[num_consumed..];
     }
 
     (original_len, res.len())
