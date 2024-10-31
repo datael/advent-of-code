@@ -32,7 +32,7 @@ fn solve_part1(input: &str) -> usize {
         .sum()
 }
 
-fn extract_patterns<'a>(input: &'a str) -> impl Iterator<Item = (Vec<u64>, Vec<u64>)> + 'a {
+fn extract_patterns<'a>(input: &'a str) -> impl Iterator<Item = (Vec<u64>, Vec<u64>)> + use<'a> {
     let mut lines = input.lines().peekable();
 
     iter::from_fn(move || {
