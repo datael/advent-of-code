@@ -39,10 +39,10 @@ fn parse_entry(line: &str) -> (u32, u32) {
 }
 
 fn solve_part2(input: &str) -> u32 {
-    let (left, mut right) = parse_lists(input);
+    let (left, right) = parse_lists(input);
 
     let counts_in_right = right
-        .iter_mut()
+        .iter()
         .fold(HashMap::<&u32, u32>::new(), |mut counts, r| {
             *counts.entry(r).or_default() += 1;
 
