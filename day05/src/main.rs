@@ -1,4 +1,8 @@
-use std::{cmp::Ordering, collections::HashMap};
+use std::{
+    cmp::Ordering,
+    collections::HashMap,
+    ops::{Deref, DerefMut},
+};
 
 const INPUT: &str = include_str!("../input.txt");
 
@@ -18,57 +22,93 @@ fn solve_part1(input: &str) -> usize {
 
     updates
         .iter()
-        .filter(|update| update.is_in_order(&ordering_rules))
-        .map(|in_order| in_order.0[in_order.0.len() / 2])
+        .filter(|update| ordering_rules.is_sorted(update))
+        .map(|in_order| in_order.get_middle_page().0)
         .sum()
 }
 
-struct OrderingRules(HashMap<usize, Vec<usize>>);
+#[derive(Debug, PartialEq, Eq, Hash)]
+struct Page(usize);
+
+impl From<&str> for Page {
+    fn from(value: &str) -> Self {
+        Page(value.parse::<usize>().unwrap())
+    }
+}
+
+struct OrderingRules(HashMap<Page, Vec<Page>>);
 
 impl From<&str> for OrderingRules {
     fn from(value: &str) -> Self {
         let rules = value
             .lines()
             .map(|line| line.split_once('|').unwrap())
-            .map(|(left, right)| {
-                (
-                    left.parse::<usize>().unwrap(),
-                    right.parse::<usize>().unwrap(),
-                )
-            });
-
-        let mut rules_map = HashMap::<usize, Vec<usize>>::new();
-        for rule in rules {
-            rules_map.entry(rule.0).or_default().push(rule.1);
-        }
-
-        Self(rules_map)
-    }
-}
-
-struct Update(Vec<usize>);
-
-impl From<&str> for Update {
-    fn from(value: &str) -> Self {
-        let rules = value.split(",").flat_map(str::parse::<usize>).collect();
+            .map(|(left, right)| (Page::from(left), Page::from(right)))
+            .fold(
+                HashMap::<Page, Vec<Page>>::new(),
+                |mut grouped_rules, rule| {
+                    grouped_rules.entry(rule.0).or_default().push(rule.1);
+                    grouped_rules
+                },
+            );
 
         Self(rules)
     }
 }
 
-impl Update {
-    fn is_in_order(&self, ordering_rules: &OrderingRules) -> bool {
-        for (i, page) in self.0.iter().skip(1).enumerate() {
-            if let Some(must_not_be_after) = ordering_rules.0.get(page) {
-                for prev_page in self.0[0..=i].iter() {
-                    if must_not_be_after.contains(prev_page) {
-                        return false;
-                    }
-                }
+impl OrderingRules {
+    fn is_sorted(&self, pages: &[Page]) -> bool {
+        pages.is_sorted_by(|a, b| self.compare(a, b) != Ordering::Greater)
+    }
+
+    fn sort(&self, pages: &mut [Page]) {
+        pages.sort_by(|a, b| self.compare(a, b));
+    }
+
+    fn compare(&self, a: &Page, b: &Page) -> Ordering {
+        if let Some(must_not_be_after) = self.0.get(a) {
+            if must_not_be_after.contains(b) {
+                return Ordering::Less;
             }
         }
 
-        true
+        if let Some(must_not_be_after) = self.0.get(b) {
+            if must_not_be_after.contains(a) {
+                return Ordering::Greater;
+            }
+        }
+
+        Ordering::Equal
+    }
+}
+
+struct Update(Vec<Page>);
+
+impl From<&str> for Update {
+    fn from(value: &str) -> Self {
+        let rules = value.split(",").map(Page::from).collect();
+
+        Self(rules)
+    }
+}
+
+impl Deref for Update {
+    type Target = Vec<Page>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for Update {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
+impl Update {
+    fn get_middle_page(&self) -> &Page {
+        &self[self.len() / 2]
     }
 }
 
@@ -80,32 +120,12 @@ fn solve_part2(input: &str) -> usize {
 
     updates
         .iter_mut()
-        .filter(|update| !update.is_in_order(&ordering_rules))
+        .filter(|update| !ordering_rules.is_sorted(update))
         .map(|not_in_order| {
-            not_in_order.sort_with_rules(&ordering_rules);
-            not_in_order.0[not_in_order.0.len() / 2]
+            ordering_rules.sort(not_in_order);
+            not_in_order.get_middle_page().0
         })
         .sum()
-}
-
-impl Update {
-    fn sort_with_rules(&mut self, ordering_rules: &OrderingRules) {
-        self.0.sort_by(|a, b| {
-            if let Some(must_not_be_after) = ordering_rules.0.get(a) {
-                if must_not_be_after.contains(b) {
-                    return Ordering::Less;
-                }
-            }
-
-            if let Some(must_not_be_after) = ordering_rules.0.get(b) {
-                if must_not_be_after.contains(a) {
-                    return Ordering::Greater;
-                }
-            }
-
-            Ordering::Equal
-        });
-    }
 }
 
 #[cfg(test)]
