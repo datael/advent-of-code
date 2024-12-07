@@ -21,11 +21,6 @@ fn solve_for_base<const BASE: usize>(line: &str) -> Option<usize> {
         .flat_map(str::parse::<usize>)
         .collect::<Vec<_>>();
 
-    let mut operators = Vec::<usize>::with_capacity(numbers.len() - 1);
-    for _ in 0..numbers.len() - 1 {
-        operators.push(0);
-    }
-
     for x in 0..(BASE.pow((numbers.len() - 1) as u32)) {
         let mut total = numbers[0];
 
