@@ -28,7 +28,7 @@ fn get_visited_from(
     let mut current_position = *initial_position;
     let mut current_direction = *initial_direction;
 
-    while grid.is_on_grid(current_position) {
+    loop {
         let mut next_position = current_position + current_direction.get_offset();
         while grid.unpassable.contains(&next_position) {
             current_direction = current_direction.get_next();
@@ -136,6 +136,7 @@ fn solve_part2(input: &str) -> usize {
     //   We don't have to try adding obstacles in every grid square.
     //   Since the guard -- without any new obstructions -- travels along a path that we can determine ahead of time,
     //   we only need to add obstacles in the spaces the guard actually visits.
+    //   This also means that we can assume all positions to block to be passable, since the guard only visits passable positions.
 
     let positions_to_block = get_visited_from(&grid, &guard_position, &Direction::Up);
 
@@ -149,12 +150,12 @@ fn solve_part2(input: &str) -> usize {
     for position_to_block in positions_to_block.iter() {
         visited.insert((guard_position, guard_direction));
 
-        let must_remove = grid.unpassable.insert(*position_to_block);
+        grid.unpassable.insert(*position_to_block);
 
         let mut guard_position = guard_position;
         let mut guard_direction = Direction::Up;
 
-        while grid.is_on_grid(guard_position) {
+        loop {
             let mut next_position = guard_position + guard_direction.get_offset();
             while grid.unpassable.contains(&next_position) {
                 guard_direction = guard_direction.get_next();
@@ -175,9 +176,7 @@ fn solve_part2(input: &str) -> usize {
             guard_position = next_position;
         }
 
-        if must_remove {
-            grid.unpassable.remove(position_to_block);
-        }
+        grid.unpassable.remove(position_to_block);
 
         visited.clear();
     }
