@@ -9,10 +9,10 @@ fn main() {
 }
 
 fn solve_part1(input: &str) -> usize {
-    input.lines().flat_map(solve_for::<2>).sum()
+    input.lines().flat_map(solve_for_base::<2>).sum()
 }
 
-fn solve_for<const BITS: usize>(line: &str) -> Option<usize> {
+fn solve_for_base<const BASE: usize>(line: &str) -> Option<usize> {
     let (target, numbers) = line.split_once(": ").unwrap();
 
     let target = target.parse::<usize>().unwrap();
@@ -26,11 +26,11 @@ fn solve_for<const BITS: usize>(line: &str) -> Option<usize> {
         operators.push(0);
     }
 
-    'outer: loop {
+    for x in 0..(BASE.pow((numbers.len() - 1) as u32)) {
         let mut total = numbers[0];
 
         for (i, n) in numbers.iter().enumerate().skip(1) {
-            match operators[i - 1] {
+            match (x / BASE.pow((i - 1) as u32)) % BASE {
                 0 => {
                     total += n;
                 }
@@ -52,24 +52,13 @@ fn solve_for<const BITS: usize>(line: &str) -> Option<usize> {
         if total == target {
             return Some(target);
         }
-
-        for i in 0..operators.len() {
-            if operators[i] + 1 == BITS {
-                operators[i] = 0;
-            } else {
-                operators[i] += 1;
-                continue 'outer;
-            }
-        }
-
-        break;
     }
 
     None
 }
 
 fn solve_part2(input: &str) -> usize {
-    input.lines().flat_map(solve_for::<3>).sum()
+    input.lines().flat_map(solve_for_base::<3>).sum()
 }
 
 #[cfg(test)]
