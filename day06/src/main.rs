@@ -13,17 +13,26 @@ fn main() {
 fn solve_part1(input: &str) -> usize {
     let (grid, guard_position) = parse_grid(input);
 
-    let mut guard_position = guard_position;
-    let mut guard_direction = Direction::Up;
+    let visited = get_visited_from(&grid, &guard_position, &Direction::Up);
+    visited.len()
+}
 
+fn get_visited_from(
+    grid: &Grid,
+    initial_position: &Position,
+    initial_direction: &Direction,
+) -> HashSet<Position> {
     let mut visited = HashSet::<Position>::new();
-    visited.insert(guard_position);
+    visited.insert(*initial_position);
 
-    while grid.is_on_grid(guard_position) {
-        let mut next_position = guard_position + guard_direction.get_offset();
+    let mut current_position = *initial_position;
+    let mut current_direction = *initial_direction;
+
+    while grid.is_on_grid(current_position) {
+        let mut next_position = current_position + current_direction.get_offset();
         while grid.unpassable.contains(&next_position) {
-            guard_direction = guard_direction.get_next();
-            next_position = guard_position + guard_direction.get_offset();
+            current_direction = current_direction.get_next();
+            next_position = current_position + current_direction.get_offset();
         }
 
         if !grid.is_on_grid(next_position) {
@@ -32,10 +41,10 @@ fn solve_part1(input: &str) -> usize {
 
         visited.insert(next_position);
 
-        guard_position = next_position;
+        current_position = next_position;
     }
 
-    visited.len()
+    visited
 }
 
 fn parse_grid(input: &str) -> (Grid, Position) {
@@ -123,7 +132,13 @@ impl Direction {
 fn solve_part2(input: &str) -> usize {
     let (grid, guard_position) = parse_grid(input);
 
-    let guard_position = guard_position;
+    // Simplest optimization:
+    //   We don't have to try adding obstacles in every grid square.
+    //   Since the guard -- without any new obstructions -- travels along a path that we can determine ahead of time,
+    //   we only need to add obstacles in the spaces the guard actually visits.
+
+    let positions_to_block = get_visited_from(&grid, &guard_position, &Direction::Up);
+
     let guard_direction = Direction::Up;
 
     let mut visited = HashSet::<(Position, Direction)>::new();
@@ -131,42 +146,40 @@ fn solve_part2(input: &str) -> usize {
 
     let mut num_loops = 0;
 
-    for x in 0..grid.width {
-        for y in 0..grid.height {
-            visited.insert((guard_position, guard_direction));
+    for position_to_block in positions_to_block.iter() {
+        visited.insert((guard_position, guard_direction));
 
-            let must_remove = grid.unpassable.insert(Position(x, y));
+        let must_remove = grid.unpassable.insert(*position_to_block);
 
-            let mut guard_position = guard_position;
-            let mut guard_direction = Direction::Up;
+        let mut guard_position = guard_position;
+        let mut guard_direction = Direction::Up;
 
-            while grid.is_on_grid(guard_position) {
-                let mut next_position = guard_position + guard_direction.get_offset();
-                while grid.unpassable.contains(&next_position) {
-                    guard_direction = guard_direction.get_next();
-                    next_position = guard_position + guard_direction.get_offset();
-                }
-
-                if !grid.is_on_grid(next_position) {
-                    break;
-                }
-
-                if visited.contains(&(next_position, guard_direction)) {
-                    num_loops += 1;
-                    break;
-                }
-
-                visited.insert((next_position, guard_direction));
-
-                guard_position = next_position;
+        while grid.is_on_grid(guard_position) {
+            let mut next_position = guard_position + guard_direction.get_offset();
+            while grid.unpassable.contains(&next_position) {
+                guard_direction = guard_direction.get_next();
+                next_position = guard_position + guard_direction.get_offset();
             }
 
-            if must_remove {
-                grid.unpassable.remove(&Position(x, y));
+            if !grid.is_on_grid(next_position) {
+                break;
             }
 
-            visited.clear();
+            if visited.contains(&(next_position, guard_direction)) {
+                num_loops += 1;
+                break;
+            }
+
+            visited.insert((next_position, guard_direction));
+
+            guard_position = next_position;
         }
+
+        if must_remove {
+            grid.unpassable.remove(position_to_block);
+        }
+
+        visited.clear();
     }
 
     num_loops
