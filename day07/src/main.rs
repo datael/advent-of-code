@@ -88,7 +88,7 @@ fn solve_alt(line: &str) -> Option<usize> {
             return running_total == target;
         }
 
-        return solve_alt_inner(numbers, target, running_total + numbers[index], index + 1)
+        solve_alt_inner(numbers, target, running_total + numbers[index], index + 1)
             || solve_alt_inner(numbers, target, running_total * numbers[index], index + 1)
             || solve_alt_inner(
                 numbers,
@@ -104,7 +104,7 @@ fn solve_alt(line: &str) -> Option<usize> {
                     rt
                 },
                 index + 1,
-            );
+            )
     }
 }
 
