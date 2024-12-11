@@ -146,7 +146,7 @@ impl Layout {
         // we know that it has already been moved.
         let mut max_file_id = {
             let mut curr_file = self[idx_right];
-            while curr_file == None {
+            while curr_file.is_none() {
                 idx_right -= 1;
                 curr_file = self[idx_right];
             }
