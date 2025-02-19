@@ -1,0 +1,7 @@
+[package]
+name = "advent-of-code-2024-day20"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+advent-of-code-2024-lib = { path = "../lib" }
