@@ -41,7 +41,12 @@ where
 {
     fn from(value: S) -> Self {
         let height = value.as_ref().lines().count();
-        let width = value.as_ref().lines().next().unwrap().len();
+        let width = value
+            .as_ref()
+            .lines()
+            .next()
+            .map(|line| line.len())
+            .unwrap_or(0);
 
         let mut grid = Grid {
             width: width as isize,
@@ -104,6 +109,20 @@ impl<T> Grid<T> {
         (offset.y * self.width + offset.x) as usize
     }
 
+    /// ```
+    /// # use advent_of_code_2024_lib::{Grid, Offset};
+    ///
+    /// let grid = Grid::<char>::from("12\n34\n");
+    /// assert_eq!(grid.iter_offsets().collect::<Vec<_>>(), vec![
+    ///     Offset { x: 0, y: 0 },
+    ///     Offset { x: 1, y: 0 },
+    ///     Offset { x: 0, y: 1 },
+    ///     Offset { x: 1, y: 1 },
+    /// ]);
+    ///
+    /// let grid = Grid::<char>::from("");
+    /// assert_eq!(grid.iter_offsets().collect::<Vec<_>>(), vec![]);
+    /// ```
     pub fn iter_offsets(&self) -> GridOffsetIter<T> {
         GridOffsetIter {
             grid: self,
@@ -130,16 +149,17 @@ impl<T> Iterator for GridOffsetIter<'_, T> {
     type Item = Offset;
 
     fn next(&mut self) -> Option<Self::Item> {
+        if self.next.y >= self.grid.height {
+            return None;
+        }
+
         let to_return = self.next;
 
-        if self.next.x + 1 == self.grid.width {
+        self.next.x += 1;
+
+        if self.next.x >= self.grid.width {
             self.next.x = 0;
             self.next.y += 1;
-            if self.next.y == self.grid.height {
-                return None;
-            }
-        } else {
-            self.next.x += 1;
         }
 
         Some(to_return)
