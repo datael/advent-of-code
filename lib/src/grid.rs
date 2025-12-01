@@ -24,7 +24,7 @@ where
             .finish()?;
 
         for (i, square) in self.tiles.iter().enumerate() {
-            if i as isize % self.width == 0 {
+            if i % self.width as usize == 0 {
                 f.write_char('\n')?;
             }
             f.write_char(square.into())?;
@@ -41,12 +41,7 @@ where
 {
     fn from(value: S) -> Self {
         let height = value.as_ref().lines().count();
-        let width = value
-            .as_ref()
-            .lines()
-            .next()
-            .map(|line| line.len())
-            .unwrap_or(0);
+        let width = value.as_ref().lines().next().map_or(0, str::len);
 
         let mut grid = Grid {
             width: width as isize,
@@ -67,15 +62,18 @@ where
 }
 
 impl<T> Grid<T> {
+    #[must_use]
     pub fn is_on_grid(&self, Offset { x, y }: Offset) -> bool {
         0 <= x && x < self.width && 0 <= y && y < self.height
     }
 
+    #[must_use]
     pub fn get_tile_at(&self, offset: Offset) -> Option<&T> {
         let index = self.to_index(offset)?;
         Some(&self.tiles[index])
     }
 
+    #[must_use]
     pub fn get_tile_at_unchecked(&self, offset: Offset) -> &T {
         debug_assert!(self.is_on_grid(offset));
 
@@ -83,11 +81,13 @@ impl<T> Grid<T> {
         &self.tiles[index]
     }
 
+    #[must_use]
     pub fn get_tile_at_mut(&mut self, offset: Offset) -> Option<&mut T> {
         let index = self.to_index(offset)?;
         Some(&mut self.tiles[index])
     }
 
+    #[must_use]
     pub fn get_tile_at_mut_unchecked(&mut self, offset: Offset) -> &mut T {
         debug_assert!(self.is_on_grid(offset));
 
@@ -95,6 +95,7 @@ impl<T> Grid<T> {
         &mut self.tiles[index]
     }
 
+    #[must_use]
     fn to_index(&self, offset: Offset) -> Option<usize> {
         if self.is_on_grid(offset) {
             Some(self.to_index_unchecked(offset))
@@ -103,6 +104,7 @@ impl<T> Grid<T> {
         }
     }
 
+    #[must_use]
     fn to_index_unchecked(&self, offset: Offset) -> usize {
         debug_assert!(self.is_on_grid(offset));
 
@@ -123,7 +125,8 @@ impl<T> Grid<T> {
     /// let grid = Grid::<char>::from("");
     /// assert_eq!(grid.iter_offsets().collect::<Vec<_>>(), vec![]);
     /// ```
-    pub fn iter_offsets(&self) -> GridOffsetIter<T> {
+    #[must_use]
+    pub fn iter_offsets(&self) -> GridOffsetIter<'_, T> {
         GridOffsetIter {
             grid: self,
             next: Offset { x: 0, y: 0 },
@@ -239,10 +242,10 @@ where
                 };
 
                 // Are we there yet?
-                if next_offset == to {
-                    return Some(next_path);
-                } else {
+                if next_offset != to {
                     nexts.push(Reverse(next_path));
+                } else {
+                    return Some(next_path);
                 }
             }
         }

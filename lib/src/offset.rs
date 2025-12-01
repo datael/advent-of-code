@@ -58,6 +58,7 @@ impl MulAssign<Offset> for Offset {
 }
 
 impl Offset {
+    #[must_use]
     pub fn manhattan_distance(&self, other: Offset) -> usize {
         ((self.x - other.x).abs() + (self.y - other.y).abs()) as usize
     }

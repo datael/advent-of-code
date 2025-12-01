@@ -20,6 +20,7 @@ impl Direction {
         .copied()
     }
 
+    #[must_use]
     pub fn into_offset(self) -> Offset {
         match self {
             Direction::Up => Offset { x: 0, y: -1 },
