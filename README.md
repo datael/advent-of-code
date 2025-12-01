@@ -1,4 +1,4 @@
-# Advent of Code 2024 in Rust 2024
+# Advent of Code 2025 in Rust 2024
 
 * Assumes all input is valid
     * Has large swathes of unwraps() and unreachable!()
