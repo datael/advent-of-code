@@ -112,7 +112,7 @@ impl<T> Grid<T> {
     }
 
     /// ```
-    /// # use advent_of_code_2024_lib::{Grid, Offset};
+    /// # use advent_of_code_2025_lib::{Grid, Offset};
     ///
     /// let grid = Grid::<char>::from("12\n34\n");
     /// assert_eq!(grid.iter_offsets().collect::<Vec<_>>(), vec![
