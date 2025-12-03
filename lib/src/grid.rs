@@ -24,7 +24,7 @@ where
             .finish()?;
 
         for (i, square) in self.tiles.iter().enumerate() {
-            if i % self.width as usize == 0 {
+            if i % self.width.cast_unsigned() == 0 {
                 f.write_char('\n')?;
             }
             f.write_char(square.into())?;
@@ -44,8 +44,8 @@ where
         let width = value.as_ref().lines().next().map_or(0, str::len);
 
         let mut grid = Grid {
-            width: width as isize,
-            height: height as isize,
+            width: width.cast_signed(),
+            height: height.cast_signed(),
             tiles: Vec::with_capacity(width * height),
         };
 
@@ -108,7 +108,7 @@ impl<T> Grid<T> {
     fn to_index_unchecked(&self, offset: Offset) -> usize {
         debug_assert!(self.is_on_grid(offset));
 
-        (offset.y * self.width + offset.x) as usize
+        (offset.y * self.width + offset.x).cast_unsigned()
     }
 
     /// ```
@@ -139,6 +139,12 @@ impl<'grid, T> IntoIterator for &'grid Grid<T> {
     type IntoIter = GridOffsetIter<'grid, T>;
 
     fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+
+impl<'grid, T> Grid<T> {
+    fn iter(&'grid self) -> GridOffsetIter<'grid, T> {
         self.iter_offsets()
     }
 }
@@ -242,11 +248,11 @@ where
                 };
 
                 // Are we there yet?
-                if next_offset != to {
-                    nexts.push(Reverse(next_path));
-                } else {
+                if next_offset == to {
                     return Some(next_path);
                 }
+
+                nexts.push(Reverse(next_path));
             }
         }
 

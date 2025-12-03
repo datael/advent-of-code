@@ -15,7 +15,6 @@ fn solve_part1(input: &str) -> usize {
         .lines()
         .map(Battery::from)
         .map(|battery| battery.get_highest_joltage::<2>())
-        .map(usize::from)
         .sum()
 }
 
@@ -71,7 +70,6 @@ fn solve_part2(input: &str) -> usize {
         .lines()
         .map(Battery::from)
         .map(|battery| battery.get_highest_joltage::<12>())
-        .map(usize::from)
         .sum()
 }
 

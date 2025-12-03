@@ -37,13 +37,7 @@ impl ValidatedRangeExt for RangeInclusive<usize> {
         let strategy = S::default();
 
         self.clone()
-            .filter_map(|number| {
-                if strategy.is_invalid(number) {
-                    Some(number as usize)
-                } else {
-                    None
-                }
-            })
+            .filter(|number| strategy.is_invalid(*number))
             .sum()
     }
 }
