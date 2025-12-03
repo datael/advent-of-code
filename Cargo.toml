@@ -3,6 +3,7 @@ resolver = "2"
 members = [
     "lib",
     "day01",
+    "day02",
 ]
 
 [workspace.dependencies]
