@@ -132,6 +132,36 @@ impl<T> Grid<T> {
             next: Offset { x: 0, y: 0 },
         }
     }
+
+    /// ```
+    /// # use advent_of_code_2025_lib::{Grid, Offset};
+    ///
+    /// let grid = Grid::<char>::from("123\n456\n789\n");
+    /// assert_eq!(grid.iter_surrounding(Offset { x: 1, y: 1 }).collect::<Vec<_>>(), vec![
+    ///     Offset { x: 0, y: 0 },
+    ///     Offset { x: 1, y: 0 },
+    ///     Offset { x: 2, y: 0 },
+    ///     Offset { x: 0, y: 1 },
+    ///     Offset { x: 2, y: 1 },
+    ///     Offset { x: 0, y: 2 },
+    ///     Offset { x: 1, y: 2 },
+    ///     Offset { x: 2, y: 2 },
+    /// ]);
+    ///
+    /// assert_eq!(grid.iter_surrounding(Offset { x: 0, y: 0 }).collect::<Vec<_>>(), vec![
+    ///     Offset { x: 1, y: 0 },
+    ///     Offset { x: 0, y: 1 },
+    ///     Offset { x: 1, y: 1 },
+    /// ]);
+    ///
+    /// let grid = Grid::<char>::from("");
+    /// assert_eq!(grid.iter_surrounding(Offset { x: 1, y: 1 }).collect::<Vec<_>>(), vec![]);
+    /// ```
+    pub fn iter_surrounding(&self, origin: Offset) -> impl Iterator<Item = Offset> {
+        (origin.y - 1..=origin.y + 1)
+            .flat_map(move |y| (origin.x - 1..=origin.x + 1).map(move |x| Offset { x, y }))
+            .filter(move |o| self.is_on_grid(*o) && *o != origin)
+    }
 }
 
 impl<'grid, T> IntoIterator for &'grid Grid<T> {
