@@ -5,15 +5,17 @@ use advent_of_code_2025_lib::Grid;
 const INPUT: &str = include_str!("../input.txt");
 
 fn main() {
+    let before = Instant::now();
     let part_1_result = solve_part1(INPUT);
+    let after = Instant::now();
     println!("Part 1: {part_1_result}");
+    println!("Part 1 took: {:?}", after - before);
 
     let before = Instant::now();
     let part_2_result = solve_part2(INPUT);
     let after = Instant::now();
-
-    dbg!(after - before);
     println!("Part 2: {part_2_result}");
+    println!("Part 2 took: {:?}", after - before);
 }
 
 fn solve_part1(input: &str) -> usize {
