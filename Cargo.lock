@@ -37,6 +37,13 @@ name = "advent-of-code-2025-day07"
 version = "0.1.0"
 
 [[package]]
+name = "advent-of-code-2025-day08"
+version = "0.1.0"
+dependencies = [
+ "advent-of-code-2025-lib",
+]
+
+[[package]]
 name = "advent-of-code-2025-lib"
 version = "0.1.0"
 
