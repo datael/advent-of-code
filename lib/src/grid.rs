@@ -6,6 +6,8 @@ use std::{
 
 use crate::{Direction, Offset};
 
+type Offset2D = Offset<isize, 2>;
+
 #[derive(PartialEq, Eq, Clone)]
 pub struct Grid<T> {
     pub width: isize,
@@ -63,18 +65,18 @@ where
 
 impl<T> Grid<T> {
     #[must_use]
-    pub fn is_on_grid(&self, Offset { x, y }: Offset) -> bool {
+    pub fn is_on_grid(&self, Offset::<isize, 2>([x, y]): Offset2D) -> bool {
         0 <= x && x < self.width && 0 <= y && y < self.height
     }
 
     #[must_use]
-    pub fn get_tile_at(&self, offset: Offset) -> Option<&T> {
+    pub fn get_tile_at(&self, offset: Offset2D) -> Option<&T> {
         let index = self.to_index(offset)?;
         Some(&self.tiles[index])
     }
 
     #[must_use]
-    pub fn get_tile_at_unchecked(&self, offset: Offset) -> &T {
+    pub fn get_tile_at_unchecked(&self, offset: Offset2D) -> &T {
         debug_assert!(self.is_on_grid(offset));
 
         let index = self.to_index_unchecked(offset);
@@ -82,13 +84,13 @@ impl<T> Grid<T> {
     }
 
     #[must_use]
-    pub fn get_tile_at_mut(&mut self, offset: Offset) -> Option<&mut T> {
+    pub fn get_tile_at_mut(&mut self, offset: Offset2D) -> Option<&mut T> {
         let index = self.to_index(offset)?;
         Some(&mut self.tiles[index])
     }
 
     #[must_use]
-    pub fn get_tile_at_mut_unchecked(&mut self, offset: Offset) -> &mut T {
+    pub fn get_tile_at_mut_unchecked(&mut self, offset: Offset2D) -> &mut T {
         debug_assert!(self.is_on_grid(offset));
 
         let index = self.to_index_unchecked(offset);
@@ -96,7 +98,7 @@ impl<T> Grid<T> {
     }
 
     #[must_use]
-    fn to_index(&self, offset: Offset) -> Option<usize> {
+    fn to_index(&self, offset: Offset2D) -> Option<usize> {
         if self.is_on_grid(offset) {
             Some(self.to_index_unchecked(offset))
         } else {
@@ -105,10 +107,10 @@ impl<T> Grid<T> {
     }
 
     #[must_use]
-    fn to_index_unchecked(&self, offset: Offset) -> usize {
+    fn to_index_unchecked(&self, offset: Offset2D) -> usize {
         debug_assert!(self.is_on_grid(offset));
 
-        (offset.y * self.width + offset.x).cast_unsigned()
+        (offset[1] * self.width + offset[0]).cast_unsigned()
     }
 
     /// ```
@@ -116,10 +118,10 @@ impl<T> Grid<T> {
     ///
     /// let grid = Grid::<char>::from("12\n34\n");
     /// assert_eq!(grid.iter_offsets().collect::<Vec<_>>(), vec![
-    ///     Offset { x: 0, y: 0 },
-    ///     Offset { x: 1, y: 0 },
-    ///     Offset { x: 0, y: 1 },
-    ///     Offset { x: 1, y: 1 },
+    ///     Offset::<isize, 2>([0, 0]),
+    ///     Offset::<isize, 2>([1, 0]),
+    ///     Offset::<isize, 2>([0, 1]),
+    ///     Offset::<isize, 2>([1, 1]),
     /// ]);
     ///
     /// let grid = Grid::<char>::from("");
@@ -129,7 +131,7 @@ impl<T> Grid<T> {
     pub fn iter_offsets(&self) -> GridOffsetIter<'_, T> {
         GridOffsetIter {
             grid: self,
-            next: Offset { x: 0, y: 0 },
+            next: Offset::<isize, 2>([0, 0]),
         }
     }
 
@@ -137,35 +139,37 @@ impl<T> Grid<T> {
     /// # use advent_of_code_2025_lib::{Grid, Offset};
     ///
     /// let grid = Grid::<char>::from("123\n456\n789\n");
-    /// assert_eq!(grid.iter_surrounding(Offset { x: 1, y: 1 }).collect::<Vec<_>>(), vec![
-    ///     Offset { x: 0, y: 0 },
-    ///     Offset { x: 1, y: 0 },
-    ///     Offset { x: 2, y: 0 },
-    ///     Offset { x: 0, y: 1 },
-    ///     Offset { x: 2, y: 1 },
-    ///     Offset { x: 0, y: 2 },
-    ///     Offset { x: 1, y: 2 },
-    ///     Offset { x: 2, y: 2 },
+    /// assert_eq!(grid.iter_surrounding(Offset::<isize, 2>([1, 1])).collect::<Vec<_>>(), vec![
+    ///     Offset::<isize, 2>([0, 0]),
+    ///     Offset::<isize, 2>([1, 0]),
+    ///     Offset::<isize, 2>([2, 0]),
+    ///     Offset::<isize, 2>([0, 1]),
+    ///     Offset::<isize, 2>([2, 1]),
+    ///     Offset::<isize, 2>([0, 2]),
+    ///     Offset::<isize, 2>([1, 2]),
+    ///     Offset::<isize, 2>([2, 2]),
     /// ]);
     ///
-    /// assert_eq!(grid.iter_surrounding(Offset { x: 0, y: 0 }).collect::<Vec<_>>(), vec![
-    ///     Offset { x: 1, y: 0 },
-    ///     Offset { x: 0, y: 1 },
-    ///     Offset { x: 1, y: 1 },
+    /// assert_eq!(grid.iter_surrounding(Offset::<isize, 2>([0, 0])).collect::<Vec<_>>(), vec![
+    ///     Offset::<isize, 2>([1, 0]),
+    ///     Offset::<isize, 2>([0, 1]),
+    ///     Offset::<isize, 2>([1, 1]),
     /// ]);
     ///
     /// let grid = Grid::<char>::from("");
-    /// assert_eq!(grid.iter_surrounding(Offset { x: 1, y: 1 }).collect::<Vec<_>>(), vec![]);
+    /// assert_eq!(grid.iter_surrounding(Offset::<isize, 2>([1, 1])).collect::<Vec<_>>(), vec![]);
     /// ```
-    pub fn iter_surrounding(&self, origin: Offset) -> impl Iterator<Item = Offset> {
-        (origin.y - 1..=origin.y + 1)
-            .flat_map(move |y| (origin.x - 1..=origin.x + 1).map(move |x| Offset { x, y }))
+    pub fn iter_surrounding(&self, origin: Offset2D) -> impl Iterator<Item = Offset2D> {
+        (origin[1] - 1..=origin[1] + 1)
+            .flat_map(move |y| {
+                (origin[0] - 1..=origin[0] + 1).map(move |x| Offset::<isize, 2>([x, y]))
+            })
             .filter(move |o| self.is_on_grid(*o) && *o != origin)
     }
 }
 
 impl<'grid, T> IntoIterator for &'grid Grid<T> {
-    type Item = Offset;
+    type Item = Offset2D;
     type IntoIter = GridOffsetIter<'grid, T>;
 
     fn into_iter(self) -> Self::IntoIter {
@@ -181,24 +185,24 @@ impl<'grid, T> Grid<T> {
 
 pub struct GridOffsetIter<'grid, T> {
     grid: &'grid Grid<T>,
-    next: Offset,
+    next: Offset2D,
 }
 
 impl<T> Iterator for GridOffsetIter<'_, T> {
-    type Item = Offset;
+    type Item = Offset2D;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.next.y >= self.grid.height {
+        if self.next[1] >= self.grid.height {
             return None;
         }
 
         let to_return = self.next;
 
-        self.next.x += 1;
+        self.next[0] += 1;
 
-        if self.next.x >= self.grid.width {
-            self.next.x = 0;
-            self.next.y += 1;
+        if self.next[0] >= self.grid.width {
+            self.next[0] = 0;
+            self.next[1] += 1;
         }
 
         Some(to_return)
@@ -208,8 +212,8 @@ impl<T> Iterator for GridOffsetIter<'_, T> {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Path {
     pub cost: usize,
-    pub offset: Offset,
-    pub path_history: Vec<Offset>,
+    pub offset: Offset2D,
+    pub path_history: Vec<Offset2D>,
 }
 
 impl Ord for Path {
@@ -232,14 +236,14 @@ impl<T> Grid<T>
 where
     T: Traversability,
 {
-    pub fn find_optimal_path(&self, from: Offset, to: Offset) -> Option<Path> {
+    pub fn find_optimal_path(&self, from: Offset2D, to: Offset2D) -> Option<Path> {
         let initial = Path {
             cost: 0,
             offset: from,
             path_history: Vec::new(),
         };
 
-        let mut visited = HashSet::<Offset>::new();
+        let mut visited = HashSet::<Offset2D>::new();
         visited.insert(initial.offset);
 
         let mut nexts = BinaryHeap::<Reverse<Path>>::new();
@@ -289,7 +293,7 @@ where
         None
     }
 
-    pub fn calculate_all_costs_from(&self, from: Offset) -> HashMap<Offset, usize> {
+    pub fn calculate_all_costs_from(&self, from: Offset2D) -> HashMap<Offset2D, usize> {
         let mut costs = HashMap::new();
 
         let initial = Path {
@@ -300,7 +304,7 @@ where
 
         costs.insert(from, 0);
 
-        let mut visited = HashSet::<Offset>::new();
+        let mut visited = HashSet::<Offset2D>::new();
         visited.insert(initial.offset);
 
         let mut nexts = BinaryHeap::<Reverse<Path>>::new();

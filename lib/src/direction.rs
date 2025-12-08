@@ -1,5 +1,7 @@
 use crate::Offset;
 
+type Offset2D = Offset<isize, 2>;
+
 #[derive(Debug, Hash, PartialEq, Eq, Clone, Copy)]
 pub enum Direction {
     Up,
@@ -21,12 +23,12 @@ impl Direction {
     }
 
     #[must_use]
-    pub fn into_offset(self) -> Offset {
+    pub fn into_offset(self) -> Offset2D {
         match self {
-            Direction::Up => Offset { x: 0, y: -1 },
-            Direction::Right => Offset { x: 1, y: 0 },
-            Direction::Down => Offset { x: 0, y: 1 },
-            Direction::Left => Offset { x: -1, y: 0 },
+            Direction::Up => Offset::<isize, 2>([0, -1]),
+            Direction::Right => Offset::<isize, 2>([1, 0]),
+            Direction::Down => Offset::<isize, 2>([0, 1]),
+            Direction::Left => Offset::<isize, 2>([-1, 0]),
         }
     }
 }
