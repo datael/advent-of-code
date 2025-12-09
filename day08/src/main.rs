@@ -1,8 +1,4 @@
-use std::{
-    cmp::Reverse,
-    collections::{BinaryHeap, HashSet},
-    time::Instant,
-};
+use std::{cmp::Reverse, collections::BinaryHeap, time::Instant};
 
 use advent_of_code_2025_lib::Offset;
 
@@ -29,67 +25,49 @@ fn solve_part1<const N: usize>(input: &str) -> usize {
     let junction_boxes = input
         .lines()
         .flat_map(Position::from_comma_separated_string)
-        .collect::<HashSet<_>>();
+        .collect::<Vec<_>>();
 
-    let mut heap: BinaryHeap<(Reverse<usize>, Position, Position)> =
+    let mut heap: BinaryHeap<(Reverse<usize>, usize, usize)> =
         BinaryHeap::with_capacity(junction_boxes.len() * junction_boxes.len());
 
     for (i, a) in junction_boxes.iter().enumerate() {
-        for b in junction_boxes.iter().skip(i + 1) {
-            heap.push((Reverse(a.euclidean_distance_sq(b)), *a, *b));
+        for (j, b) in junction_boxes.iter().enumerate().skip(i + 1) {
+            heap.push((Reverse(a.euclidean_distance_sq(b)), i, j));
         }
     }
 
-    let mut junction_boxes = junction_boxes;
-    let mut circuits = Vec::<HashSet<Position>>::new();
+    let mut circuits = vec![const { None::<usize> }; junction_boxes.len()];
+    let mut next_circuit_idx = 0;
 
     let mut n = 0;
 
-    while let Some((_, a, b)) = heap.pop() {
-        let circuit_a = circuits.iter().position(|circuit| circuit.contains(&a));
-        let circuit_b = circuits.iter().position(|circuit| circuit.contains(&b));
+    while let Some((_, a_idx, b_idx)) = heap.pop() {
+        let a_circuit_idx = circuits[a_idx];
+        let b_circuit_idx = circuits[b_idx];
 
-        match (circuit_a, circuit_b) {
+        match (a_circuit_idx, b_circuit_idx) {
             (None, None) => {
-                // println!("inserting {:?} and {:?} into NEW", a, b);
-                circuits.push(HashSet::from_iter([a, b]));
+                circuits[a_idx] = Some(next_circuit_idx);
+                circuits[b_idx] = Some(next_circuit_idx);
+                next_circuit_idx += 1;
             }
-            (None, Some(circuit_b_position)) => {
-                // println!("inserting {:?} into {:?}'s circuit", a, b);
-                circuits[circuit_b_position].insert(a);
+            (None, Some(circuit_idx)) => {
+                circuits[a_idx] = Some(circuit_idx);
             }
-            (Some(circuit_a_position), None) => {
-                // println!("inserting {:?} into {:?}'s circuit", b, a);
-                circuits[circuit_a_position].insert(b);
+            (Some(circuit_idx), None) => {
+                circuits[b_idx] = Some(circuit_idx);
             }
-            (Some(circuit_a_position), Some(circuit_b_position))
-                if circuit_a_position != circuit_b_position =>
-            {
-                // println!(
-                //     "merging two circuits at indexes {:?} and {:?}",
-                //     circuit_a_position, circuit_b_position
-                // );
-
-                let mut circuit_b = HashSet::new();
-                std::mem::swap(&mut circuit_b, &mut circuits[circuit_b_position]);
-
-                for b in circuit_b.drain() {
-                    circuits[circuit_a_position].insert(b);
+            (Some(a_circuit_idx), Some(b_circuit_idx)) => {
+                if !a_circuit_idx.eq(&b_circuit_idx) {
+                    for circuit in circuits.iter_mut() {
+                        if let Some(idx) = circuit
+                            && *idx == b_circuit_idx
+                        {
+                            *idx = a_circuit_idx;
+                        }
+                    }
                 }
-
-                circuits.swap_remove(circuit_b_position);
             }
-            (Some(_), Some(_)) => {
-
-                // println!("{:?} and {:?} already in the same circuit", b, a);
-            }
-        }
-
-        junction_boxes.remove(&a);
-        junction_boxes.remove(&b);
-
-        if junction_boxes.is_empty() {
-            break;
         }
 
         n += 1;
@@ -98,9 +76,21 @@ fn solve_part1<const N: usize>(input: &str) -> usize {
         }
     }
 
-    circuits.sort_by_key(|a| Reverse(a.len()));
+    let mut circuits = circuits
+        .iter()
+        .fold(vec![0; next_circuit_idx], |mut acc, circuit_idx| {
+            if let Some(idx) = circuit_idx {
+                acc[*idx] += 1;
+            }
+            acc
+        })
+        .into_iter()
+        .map(Reverse)
+        .collect::<Vec<_>>();
 
-    circuits.iter().take(3).map(HashSet::len).product()
+    circuits.sort_unstable();
+
+    circuits.iter().take(3).map(|r| r.0).product()
 }
 
 #[inline(never)]
@@ -110,58 +100,53 @@ fn solve_part2(input: &str) -> usize {
     let junction_boxes = input
         .lines()
         .flat_map(Position::from_comma_separated_string)
-        .collect::<HashSet<_>>();
+        .collect::<Vec<_>>();
 
-    let mut heap: BinaryHeap<(Reverse<usize>, Position, Position)> =
+    let mut heap: BinaryHeap<(Reverse<usize>, usize, usize)> =
         BinaryHeap::with_capacity(junction_boxes.len() * junction_boxes.len());
 
     for (i, a) in junction_boxes.iter().enumerate() {
-        for b in junction_boxes.iter().skip(i + 1) {
-            heap.push((Reverse(a.euclidean_distance_sq(b)), *a, *b));
+        for (j, b) in junction_boxes.iter().enumerate().skip(i + 1) {
+            heap.push((Reverse(a.euclidean_distance_sq(b)), i, j));
         }
     }
 
-    let mut junction_boxes = junction_boxes;
-    let mut circuits = Vec::<HashSet<Position>>::new();
+    let mut circuits = vec![const { None::<usize> }; junction_boxes.len()];
+    let mut next_circuit_idx = 0;
 
-    while let Some((_, a, b)) = heap.pop() {
-        let circuit_a = circuits.iter().position(|circuit| circuit.contains(&a));
-        let circuit_b = circuits.iter().position(|circuit| circuit.contains(&b));
+    while let Some((_, a_idx, b_idx)) = heap.pop() {
+        let a_circuit_idx = circuits[a_idx];
+        let b_circuit_idx = circuits[b_idx];
 
-        match (circuit_a, circuit_b) {
+        match (a_circuit_idx, b_circuit_idx) {
             (None, None) => {
-                circuits.push(HashSet::from_iter([a, b]));
+                circuits[a_idx] = Some(next_circuit_idx);
+                circuits[b_idx] = Some(next_circuit_idx);
+                next_circuit_idx += 1;
             }
-            (None, Some(circuit_b_position)) => {
-                circuits[circuit_b_position].insert(a);
+            (None, Some(circuit_idx)) => {
+                circuits[a_idx] = Some(circuit_idx);
             }
-            (Some(circuit_a_position), None) => {
-                circuits[circuit_a_position].insert(b);
+            (Some(circuit_idx), None) => {
+                circuits[b_idx] = Some(circuit_idx);
             }
-            (Some(circuit_a_position), Some(circuit_b_position))
-                if circuit_a_position != circuit_b_position =>
-            {
-                let mut circuit_b = HashSet::new();
-                std::mem::swap(&mut circuit_b, &mut circuits[circuit_b_position]);
-
-                for b in circuit_b.drain() {
-                    circuits[circuit_a_position].insert(b);
+            (Some(a_circuit_idx), Some(b_circuit_idx)) => {
+                if !a_circuit_idx.eq(&b_circuit_idx) {
+                    for circuit in circuits.iter_mut() {
+                        if let Some(idx) = circuit
+                            && *idx == b_circuit_idx
+                        {
+                            *idx = a_circuit_idx;
+                        }
+                    }
                 }
-
-                circuits.swap_remove(circuit_b_position);
             }
-            (Some(_), Some(_)) => {}
         }
 
-        junction_boxes.remove(&a);
-        junction_boxes.remove(&b);
-
-        if circuits.len() == 1 && junction_boxes.is_empty() {
+        if circuits.iter().all(Option::is_some) {
+            let a = junction_boxes[a_idx];
+            let b = junction_boxes[b_idx];
             return a.x().cast_unsigned() * b.x().cast_unsigned();
-        }
-
-        if junction_boxes.is_empty() {
-            break;
         }
     }
 
