@@ -52,7 +52,7 @@ impl<T> Offset<T, 3> {
 }
 
 impl<T, const DIM: usize> Offset<T, DIM> {
-    pub fn from_comma_separated_string<'s>(value: &'s str) -> Result<Self, <T as FromStr>::Err>
+    pub fn from_comma_separated_str<'s>(value: &'s str) -> Result<Self, <T as FromStr>::Err>
     where
         T: FromStr,
     {
@@ -73,6 +73,13 @@ impl<T, const DIM: usize> Offset<T, DIM> {
 
         // SAFETY: If we got this far, we just initialized these above correctly.
         Ok(Offset::<T, DIM>(out.map(|d| unsafe { d.assume_init() })))
+    }
+
+    pub fn abs(&self) -> Self
+    where
+        T: Copy + Signed,
+    {
+        Self(self.map(|a| a.abs()))
     }
 }
 

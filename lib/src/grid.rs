@@ -15,6 +15,19 @@ pub struct Grid<T> {
     pub tiles: Vec<T>,
 }
 
+impl<T> Grid<T> {
+    pub fn new_with_dimensions(width: isize, height: isize, default_value: T) -> Self
+    where
+        T: Copy,
+    {
+        Grid {
+            width: width,
+            height: height,
+            tiles: vec![default_value; width.cast_unsigned() * height.cast_unsigned()],
+        }
+    }
+}
+
 impl<T> fmt::Debug for Grid<T>
 where
     for<'a> &'a T: Into<char>,

@@ -24,7 +24,7 @@ fn solve_part1<const N: usize>(input: &str) -> usize {
 
     let junction_boxes = input
         .lines()
-        .flat_map(Position::from_comma_separated_string)
+        .flat_map(Position::from_comma_separated_str)
         .collect::<Vec<_>>();
 
     let mut heap: BinaryHeap<(Reverse<usize>, usize, usize)> =
@@ -99,7 +99,7 @@ fn solve_part2(input: &str) -> usize {
 
     let junction_boxes = input
         .lines()
-        .flat_map(Position::from_comma_separated_string)
+        .flat_map(Position::from_comma_separated_str)
         .collect::<Vec<_>>();
 
     let mut heap: BinaryHeap<(Reverse<usize>, usize, usize)> =
